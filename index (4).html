@@ -1,0 +1,2005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tamil Nadu Government – Department of AI, Ramanathapuram</title>
+  <style>
+    /* ============================================================
+       DESIGN TOKENS & RESET
+    ============================================================ */
+    :root {
+      --tn-blue:       #003366;
+      --tn-blue-light: #004488;
+      --tn-blue-dark:  #001e3c;
+      --tn-red:        #C62828;
+      --tn-red-light:  #EF5350;
+      --tn-green:      #2E7D32;
+      --tn-green-light:#43A047;
+      --tn-gold:       #F9A825;
+      --white:         #FFFFFF;
+      --light-gray:    #F5F7FA;
+      --mid-gray:      #E8ECF0;
+      --border-gray:   #D0D7DE;
+      --text-dark:     #1A1A1A;
+      --text-mid:      #4A5568;
+      --text-light:    #718096;
+      --shadow-sm:     0 2px 8px rgba(0,0,0,.08);
+      --shadow-md:     0 4px 20px rgba(0,0,0,.12);
+      --shadow-lg:     0 8px 40px rgba(0,0,0,.18);
+      --radius-sm:     6px;
+      --radius-md:     12px;
+      --radius-lg:     20px;
+      --transition:    all .28s cubic-bezier(.4,0,.2,1);
+      /* dark mode overrides */
+      --bg-page:       var(--light-gray);
+      --bg-card:       var(--white);
+      --text-primary:  var(--text-dark);
+      --text-secondary:var(--text-mid);
+    }
+    [data-theme="dark"] {
+      --bg-page:       #0d1117;
+      --bg-card:       #161b22;
+      --text-primary:  #e6edf3;
+      --text-secondary:#8b949e;
+      --border-gray:   #30363d;
+      --mid-gray:      #21262d;
+      --light-gray:    #0d1117;
+      --shadow-sm:     0 2px 8px rgba(0,0,0,.4);
+      --shadow-md:     0 4px 20px rgba(0,0,0,.5);
+      --shadow-lg:     0 8px 40px rgba(0,0,0,.6);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      transition: background .35s, color .35s;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; border: none; outline: none; font-family: inherit; }
+    input, select { font-family: inherit; }
+    img { max-width: 100%; }
+    ul { list-style: none; }
+
+    /* ============================================================
+       LOADING OVERLAY
+    ============================================================ */
+    #loading-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--tn-blue);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      transition: opacity .5s;
+    }
+    #loading-overlay.hide { opacity: 0; pointer-events: none; }
+    .loading-emblem img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      background: #fff;
+      padding: 10px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+    }
+    .spinner {
+      width: 56px; height: 56px;
+      border: 5px solid rgba(255,255,255,.25);
+      border-top-color: var(--tn-gold);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text {
+      color: #fff; margin-top: 18px;
+      font-size: 1rem; letter-spacing: 2px;
+      opacity: .8;
+    }
+    .loading-emblem {  }
+
+    /* ============================================================
+       TOAST NOTIFICATION
+    ============================================================ */
+    #toast-container {
+      position: fixed; top: 80px; right: 20px;
+      z-index: 8000; display: flex;
+      flex-direction: column; gap: 10px;
+    }
+    .toast {
+      background: var(--bg-card);
+      border-left: 4px solid var(--tn-green);
+      padding: 14px 20px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-md);
+      min-width: 260px; max-width: 340px;
+      display: flex; align-items: center; gap: 12px;
+      animation: slideIn .35s ease;
+      font-size: .9rem;
+      color: var(--text-primary);
+    }
+    .toast.error { border-left-color: var(--tn-red); }
+    .toast.warn  { border-left-color: var(--tn-gold); }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to   { transform: translateX(0);    opacity: 1; }
+    }
+
+    /* ============================================================
+       GLOBAL HEADER / NAV
+    ============================================================ */
+    #site-header {
+      position: sticky; top: 0; z-index: 900;
+      background: var(--tn-blue);
+      box-shadow: 0 2px 12px rgba(0,0,0,.35);
+    }
+    .header-top {
+      background: var(--tn-blue-dark);
+      padding: 6px 24px;
+      display: flex; align-items: center;
+      justify-content: space-between;
+      font-size: .78rem; color: rgba(255,255,255,.75);
+    }
+    .header-top-left { display: flex; align-items: center; gap: 16px; }
+    .header-top a { color: rgba(255,255,255,.75); }
+    .header-top a:hover { color: var(--tn-gold); }
+    .header-main {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 10px 24px;
+    }
+    .logo-area { display: flex; align-items: center; gap: 14px; cursor: pointer; }
+    .logo-area img {
+      width: 58px;
+      height: 58px;
+      object-fit: contain;
+      background: #fff;
+      padding: 5px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .logo-area:hover .logo-text h1 { color: var(--tn-gold); }
+    .logo-text h1 {
+      font-size: 1.05rem; color: #fff;
+      font-weight: 700; letter-spacing: .5px;
+      transition: color .2s;
+    }
+    .logo-text p {
+      font-size: .72rem; color: rgba(255,255,255,.65);
+      margin-top: 1px;
+    }
+    .header-controls { display: flex; align-items: center; gap: 12px; }
+    .nav-links {
+      display: flex; align-items: center; gap: 4px;
+    }
+    .nav-links button {
+      background: transparent; color: rgba(255,255,255,.85);
+      padding: 7px 14px; border-radius: var(--radius-sm);
+      font-size: .85rem; transition: var(--transition);
+      letter-spacing: .3px;
+    }
+    .nav-links button:hover,
+    .nav-links button.active {
+      background: rgba(255,255,255,.12);
+      color: var(--tn-gold);
+    }
+    .btn-icon {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.1);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+    .btn-icon:hover { background: rgba(255,255,255,.2); color: var(--tn-gold); }
+    .hamburger {
+      display: none;
+      background: transparent;
+      color: #fff; font-size: 1.4rem;
+      padding: 6px;
+    }
+    /* Mobile Nav */
+    .mobile-nav {
+      display: none; flex-direction: column;
+      background: var(--tn-blue-dark);
+      padding: 12px 16px;
+    }
+    .mobile-nav button {
+      background: transparent; color: rgba(255,255,255,.85);
+      padding: 10px 12px;
+      text-align: left; font-size: .9rem;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+    }
+    .mobile-nav button:hover { background: rgba(255,255,255,.1); color: var(--tn-gold); }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; align-items: center; }
+      .mobile-nav.open { display: flex; }
+      .header-top { display: none; }
+      .logo-text h1 { font-size: .9rem; }
+    }
+
+    /* ============================================================
+       PAGES
+    ============================================================ */
+    .page { display: none; animation: fadeUp .45s ease; }
+    .page.active { display: block; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       BREADCRUMB
+    ============================================================ */
+    .breadcrumb {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-gray);
+      padding: 10px 24px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: .82rem; color: var(--text-secondary);
+    }
+    .breadcrumb span { color: var(--tn-blue); cursor: pointer; }
+    .breadcrumb span:hover { text-decoration: underline; }
+
+    /* ============================================================
+       PAGE 1 – HOME
+    ============================================================ */
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, var(--tn-blue-dark) 0%, var(--tn-blue) 55%, #005588 100%);
+      min-height: 88vh;
+      display: flex; align-items: center;
+      position: relative; overflow: hidden;
+      padding: 60px 24px;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      opacity: .6;
+    }
+    .hero-inner {
+      max-width: 1200px; margin: 0 auto;
+      width: 100%;
+      display: grid; grid-template-columns: 1fr 420px;
+      gap: 60px; align-items: center;
+      position: relative; z-index: 1;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.2);
+      padding: 6px 16px; border-radius: 30px;
+      color: var(--tn-gold); font-size: .8rem;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 4.5vw, 3.2rem);
+      color: #fff; line-height: 1.22;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--tn-gold);
+    }
+    .hero-desc {
+      color: rgba(255,255,255,.8);
+      font-size: 1.05rem; line-height: 1.75;
+      margin-bottom: 32px;
+      max-width: 520px;
+    }
+    .hero-stats {
+      display: flex; gap: 28px; margin-bottom: 36px;
+      flex-wrap: wrap;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat strong {
+      display: block; font-size: 1.8rem;
+      color: var(--tn-gold); font-weight: 700;
+    }
+    .hero-stat span { font-size: .78rem; color: rgba(255,255,255,.65); }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--tn-gold);
+      color: var(--tn-blue-dark);
+      padding: 16px 36px; border-radius: var(--radius-sm);
+      font-size: 1rem; font-weight: 700;
+      letter-spacing: .5px;
+      transition: var(--transition);
+      box-shadow: 0 4px 20px rgba(249,168,37,.4);
+    }
+    .btn-primary:hover {
+      background: #e6971a;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(249,168,37,.5);
+    }
+    .btn-primary:active { transform: translateY(0); }
+    /* Hero illustration */
+    .hero-visual {
+      position: relative;
+    }
+    .hero-visual img {
+      width: 100%;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+    }
+    @media (max-width: 900px) {
+      .hero-inner { grid-template-columns: 1fr; }
+      .hero-visual { display: none; }
+    }
+
+    /* Home quick-actions */
+    .home-section {
+      max-width: 1200px; margin: 0 auto; padding: 56px 24px;
+    }
+    .section-label {
+      font-size: .78rem; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--tn-blue);
+      margin-bottom: 8px;
+    }
+    [data-theme="dark"] .section-label { color: var(--tn-gold); }
+    .section-title {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      color: var(--text-primary); margin-bottom: 14px;
+    }
+    .section-desc {
+      color: var(--text-secondary); line-height: 1.7;
+      max-width: 640px; margin-bottom: 36px; font-size: .95rem;
+    }
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .quick-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-gray);
+      border-radius: var(--radius-md);
+      padding: 24px 20px;
+      text-align: center;
+      transition: var(--transition);
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+    }
+    .quick-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--tn-blue);
+    }
+    .quick-card-icon {
+      width: 60px; height: 60px;
+      background: linear-gradient(135deg, var(--tn-blue), var(--tn-blue-light));
+      border-radius: 14px; margin: 0 auto 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+    }
+    .quick-card h3 { font-size: .95rem; margin-bottom: 6px; color: var(--text-primary); }
+    .quick-card p { font-size: .8rem; color: var(--text-secondary); line-height: 1.5; }
+
+    /* ============================================================
+       PAGE 2 – DEPARTMENTS
+    ============================================================ */
+    .page-hero {
+      background: linear-gradient(135deg, var(--tn-blue-dark), var(--tn-blue));
+      padding: 48px 24px;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .page-hero::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, transparent 60%, var(--bg-page));
+      pointer-events: none;
+    }
+    .page-hero h1 { color: #fff; font-size: clamp(1.6rem, 3.5vw, 2.4rem); margin-bottom: 12px; }
+    .page-hero p { color: rgba(255,255,255,.75); max-width: 560px; margin: 0 auto; font-size: .95rem; line-height: 1.7; }
+    .search-bar-wrap {
+      max-width: 520px; margin: 24px auto 0;
+      position: relative;
+    }
+    .search-bar-wrap input {
+      width: 100%; padding: 13px 46px 13px 18px;
+      border-radius: 8px; border: none;
+      font-size: .95rem; background: #fff;
+      color: var(--text-dark);
+      box-shadow: var(--shadow-md);
+    }
+    .search-bar-wrap svg {
+      position: absolute; right: 16px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+    }
+    .dept-grid-section { max-width: 1200px; margin: 0 auto; padding: 48px 24px; }
+    .dept-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+    }
+    .dept-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-gray);
+      border-radius: var(--radius-md);
+      padding: 26px 22px;
+      transition: var(--transition);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .dept-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--tn-blue), var(--tn-green));
+    }
+    .dept-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--tn-blue);
+    }
+    .dept-card-header {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 16px;
+    }
+    .dept-icon-wrap {
+      width: 52px; height: 52px; flex-shrink: 0;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+    }
+    .dept-card h3 { font-size: 1rem; margin-bottom: 8px; color: var(--text-primary); line-height: 1.35; }
+    .dept-card p { font-size: .83rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1.5px solid var(--tn-blue); color: var(--tn-blue);
+      padding: 8px 18px; border-radius: var(--radius-sm);
+      font-size: .84rem; font-weight: 600;
+      transition: var(--transition);
+      background: transparent;
+    }
+    .btn-outline:hover {
+      background: var(--tn-blue); color: #fff;
+    }
+    [data-theme="dark"] .btn-outline { border-color: #4a9eff; color: #4a9eff; }
+    [data-theme="dark"] .btn-outline:hover { background: #4a9eff; color: #000; }
+
+    /* ============================================================
+       PAGE 3 – DEPARTMENT DETAIL
+    ============================================================ */
+    .dept-detail-hero {
+      background: linear-gradient(135deg, var(--tn-blue-dark) 0%, var(--tn-blue) 60%, var(--tn-green) 100%);
+      padding: 56px 24px;
+      position: relative; overflow: hidden;
+    }
+    .dept-detail-hero-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; align-items: center; gap: 36px;
+    }
+    .dept-detail-icon-big {
+      width: 90px; height: 90px; flex-shrink: 0;
+      background: rgba(255,255,255,.12);
+      border: 2px solid rgba(255,255,255,.2);
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.8rem;
+    }
+    .dept-detail-hero h1 { font-size: clamp(1.6rem, 3vw, 2.2rem); color: #fff; margin-bottom: 10px; }
+    .dept-detail-hero p { color: rgba(255,255,255,.8); font-size: .95rem; max-width: 560px; line-height: 1.7; }
+    @media (max-width: 600px) { .dept-detail-hero-inner { flex-direction: column; text-align: center; } }
+    .dept-detail-body { max-width: 1100px; margin: 0 auto; padding: 48px 24px; }
+    .detail-grid {
+      display: grid; grid-template-columns: 2fr 1fr;
+      gap: 30px;
+    }
+    @media (max-width: 800px) { .detail-grid { grid-template-columns: 1fr; } }
+    .detail-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-gray);
+      border-radius: var(--radius-md);
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .detail-card h2 {
+      font-size: 1.15rem; color: var(--tn-blue);
+      margin-bottom: 16px; padding-bottom: 12px;
+      border-bottom: 2px solid var(--mid-gray);
+      display: flex; align-items: center; gap: 10px;
+    }
+    [data-theme="dark"] .detail-card h2 { color: var(--tn-gold); border-color: var(--border-gray); }
+    .detail-card p { font-size: .9rem; color: var(--text-secondary); line-height: 1.75; margin-bottom: 12px; }
+    .responsibility-list li {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 0; border-bottom: 1px solid var(--mid-gray);
+      font-size: .88rem; color: var(--text-secondary);
+    }
+    .responsibility-list li:last-child { border: none; }
+    .resp-bullet {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--tn-blue); flex-shrink: 0; margin-top: 6px;
+    }
+    [data-theme="dark"] .resp-bullet { background: var(--tn-gold); }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .stat-box {
+      background: linear-gradient(135deg, var(--tn-blue), var(--tn-blue-light));
+      border-radius: var(--radius-sm);
+      padding: 18px; text-align: center;
+      color: #fff;
+    }
+    .stat-box strong { display: block; font-size: 1.6rem; color: var(--tn-gold); }
+    .stat-box span { font-size: .76rem; opacity: .85; }
+    .benefit-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(46,125,50,.1); color: var(--tn-green);
+      padding: 6px 12px; border-radius: 20px;
+      font-size: .8rem; margin: 4px;
+      border: 1px solid rgba(46,125,50,.2);
+    }
+    [data-theme="dark"] .benefit-tag { background: rgba(67,160,71,.15); color: #66bb6a; }
+    .btn-services {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      background: var(--tn-blue); color: #fff;
+      padding: 18px 40px; border-radius: var(--radius-sm);
+      font-size: 1.05rem; font-weight: 700;
+      letter-spacing: .5px; width: 100%;
+      transition: var(--transition);
+      box-shadow: 0 4px 20px rgba(0,51,102,.3);
+      margin-top: 8px;
+    }
+    .btn-services:hover {
+      background: var(--tn-blue-light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,51,102,.4);
+    }
+
+    /* ============================================================
+       PAGE 4 – LOGIN
+    ============================================================ */
+    .login-page {
+      min-height: calc(100vh - 120px);
+      display: flex; flex-direction: column;
+      align-items: center;
+      background: var(--bg-page);
+      padding: 48px 24px;
+    }
+    .login-page-header { text-align: center; margin-bottom: 40px; }
+    .login-page-header h1 {
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      color: var(--text-primary); margin-bottom: 10px;
+    }
+    .login-page-header p { color: var(--text-secondary); font-size: .9rem; }
+    .login-panels {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 28px; width: 100%; max-width: 900px;
+    }
+    @media (max-width: 700px) { .login-panels { grid-template-columns: 1fr; } }
+    .login-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-gray);
+      border-radius: var(--radius-lg);
+      padding: 34px 28px;
+      box-shadow: var(--shadow-md);
+    }
+    .login-panel-header {
+      text-align: center; margin-bottom: 28px;
+    }
+    .login-panel-icon {
+      width: 64px; height: 64px;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; margin: 0 auto 14px;
+    }
+    .login-panel h2 { font-size: 1.1rem; color: var(--text-primary); margin-bottom: 6px; }
+    .login-panel p { font-size: .82rem; color: var(--text-secondary); }
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block; font-size: .83rem;
+      color: var(--text-secondary); margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .input-wrap { position: relative; }
+    .input-wrap input {
+      width: 100%;
+      padding: 11px 40px 11px 14px;
+      border: 1.5px solid var(--border-gray);
+      border-radius: var(--radius-sm);
+      font-size: .9rem; color: var(--text-primary);
+      background: var(--bg-page);
+      transition: var(--transition);
+    }
+    .input-wrap input:focus {
+      outline: none;
+      border-color: var(--tn-blue);
+      box-shadow: 0 0 0 3px rgba(0,51,102,.12);
+    }
+    [data-theme="dark"] .input-wrap input:focus { box-shadow: 0 0 0 3px rgba(74,158,255,.15); }
+    .input-wrap input.error-field { border-color: var(--tn-red); }
+    .toggle-pw {
+      position: absolute; right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: transparent; color: var(--text-light);
+      font-size: .9rem; padding: 4px;
+    }
+    .toggle-pw:hover { color: var(--tn-blue); }
+    .field-error { font-size: .75rem; color: var(--tn-red); margin-top: 4px; }
+    .btn-login {
+      width: 100%;
+      background: var(--tn-blue); color: #fff;
+      padding: 13px; border-radius: var(--radius-sm);
+      font-size: .95rem; font-weight: 700;
+      letter-spacing: .5px;
+      transition: var(--transition);
+      box-shadow: 0 3px 12px rgba(0,51,102,.25);
+    }
+    .btn-login:hover { background: var(--tn-blue-light); transform: translateY(-1px); }
+    .btn-register-link {
+      width: 100%; margin-top: 10px;
+      background: transparent;
+      border: 1.5px solid var(--border-gray);
+      color: var(--text-secondary);
+      padding: 11px; border-radius: var(--radius-sm);
+      font-size: .88rem; transition: var(--transition);
+    }
+    .btn-register-link:hover { border-color: var(--tn-blue); color: var(--tn-blue); }
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 18px 0;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1;
+      height: 1px; background: var(--border-gray);
+    }
+    .divider span { font-size: .75rem; color: var(--text-light); }
+
+    /* ============================================================
+       PAGE 5 – REGISTRATION
+    ============================================================ */
+    .register-wrap {
+      max-width: 560px; width: 100%; margin: 0 auto;
+      padding: 40px 24px;
+    }
+    .register-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-gray);
+      border-radius: var(--radius-lg);
+      padding: 36px 30px;
+      box-shadow: var(--shadow-md);
+    }
+    .register-panel h2 {
+      font-size: 1.3rem; margin-bottom: 6px;
+      color: var(--text-primary);
+    }
+    .register-panel p { font-size: .85rem; color: var(--text-secondary); margin-bottom: 28px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+    .btn-submit {
+      width: 100%;
+      background: var(--tn-green); color: #fff;
+      padding: 14px; border-radius: var(--radius-sm);
+      font-size: .95rem; font-weight: 700;
+      transition: var(--transition);
+      box-shadow: 0 3px 12px rgba(46,125,50,.25);
+    }
+    .btn-submit:hover { background: var(--tn-green-light); transform: translateY(-1px); }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--tn-blue); font-size: .85rem; margin-bottom: 20px;
+      cursor: pointer; background: transparent;
+    }
+    .back-link:hover { text-decoration: underline; }
+    [data-theme="dark"] .back-link { color: #4a9eff; }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    footer {
+      background: var(--tn-blue-dark);
+      color: rgba(255,255,255,.75);
+      padding: 48px 24px 28px;
+      margin-top: 40px;
+    }
+    .footer-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 36px; margin-bottom: 36px;
+    }
+    @media (max-width: 900px) { .footer-inner { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 560px) { .footer-inner { grid-template-columns: 1fr; } }
+    .footer-brand h3 { color: #fff; font-size: 1rem; margin-bottom: 10px; }
+    .footer-brand p { font-size: .82rem; line-height: 1.7; max-width: 280px; }
+    .footer-col h4 { color: #fff; font-size: .88rem; margin-bottom: 14px; letter-spacing: .5px; }
+    .footer-col a {
+      display: block; font-size: .8rem; margin-bottom: 8px;
+      color: rgba(255,255,255,.65); transition: color .2s;
+    }
+    .footer-col a:hover { color: var(--tn-gold); }
+    .footer-divider { border: none; border-top: 1px solid rgba(255,255,255,.1); margin-bottom: 24px; }
+    .footer-bottom {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: .78rem; color: rgba(255,255,255,.5);
+      flex-wrap: wrap; gap: 10px;
+    }
+    .footer-badges { display: flex; gap: 10px; flex-wrap: wrap; }
+    .footer-badge {
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 4px 10px; border-radius: 4px;
+      font-size: .72rem; color: rgba(255,255,255,.65);
+    }
+
+    /* ============================================================
+       REDIRECT LOADING PAGE
+    ============================================================ */
+    #redirect-page {
+      position: fixed; inset: 0; z-index: 8500;
+      background: var(--tn-blue);
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: #fff; text-align: center;
+    }
+    #redirect-page.show { display: flex; }
+    #redirect-page h2 { font-size: 1.6rem; margin: 24px 0 10px; }
+    #redirect-page p { opacity: .75; font-size: .95rem; }
+
+    /* ============================================================
+       SCROLL ANIMATIONS
+    ============================================================ */
+    .reveal {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ============================================================
+       MISC UTILITIES
+    ============================================================ */
+    .text-center { text-align: center; }
+    .mt-8  { margin-top: 8px; }
+    .mt-16 { margin-top: 16px; }
+    .mt-24 { margin-top: 24px; }
+    .mb-0  { margin-bottom: 0; }
+    .hidden { display: none !important; }
+    .chip {
+      display: inline-block; padding: 4px 12px;
+      background: rgba(0,51,102,.08); color: var(--tn-blue);
+      border-radius: 20px; font-size: .75rem;
+      border: 1px solid rgba(0,51,102,.15);
+    }
+    [data-theme="dark"] .chip { background: rgba(255,255,255,.06); color: #8ab4f8; border-color: rgba(255,255,255,.12); }
+    .select-input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border-gray);
+      border-radius: var(--radius-sm);
+      font-size: .9rem; color: var(--text-primary);
+      background: var(--bg-page);
+      transition: var(--transition);
+      -webkit-appearance: none;
+    }
+    .select-input:focus { outline: none; border-color: var(--tn-blue); }
+  </style>
+</head>
+<body data-theme="light">
+
+<!-- ====================================================
+     LOADING OVERLAY
+==================================================== -->
+<div id="loading-overlay">
+  <div class="loading-emblem">
+    <img src="C:/Users/anumu/Documents/Tn_revenue/images/new.png" alt="Government of Tamil Nadu Logo">
+  </div>
+  <div class="spinner"></div>
+  <p class="loading-text">GOVERNMENT OF TAMIL NADU</p>
+</div>
+
+<!-- ====================================================
+     TOAST CONTAINER
+==================================================== -->
+<div id="toast-container"></div>
+
+<!-- ====================================================
+     REDIRECT PAGE
+==================================================== -->
+<div id="redirect-page">
+  <div class="spinner" style="border-top-color:#F9A825;width:64px;height:64px;border-width:6px;"></div>
+  <h2>Login Successful</h2>
+  <p>Redirecting to TN e-Sevai Portal...</p>
+</div>
+
+<!-- ====================================================
+     SITE HEADER
+==================================================== -->
+<header id="site-header">
+  <div class="header-top">
+    <div class="header-top-left">
+      <span>🏛️ Government of Tamil Nadu</span>
+      <span>|</span>
+      <span>Department of Artificial Intelligence</span>
+    </div>
+    <div>Ramanathapuram District &nbsp;|&nbsp; <a href="#">Screen Reader</a> &nbsp;|&nbsp; <a href="#">Accessibility</a></div>
+  </div>
+  <div class="header-main">
+    <div class="logo-area" onclick="navigate('home')">
+      <!-- TN Emblem Logo -->
+      <img src="C:/Users/anumu/Documents/Tn_revenue/images/new.png" alt="Government of Tamil Nadu Logo">
+      <div class="logo-text">
+        <h1>Government of Tamil Nadu</h1>
+        <p>Department of AI &nbsp;·&nbsp; Ramanathapuram District</p>
+      </div>
+    </div>
+    <div class="header-controls">
+      <nav class="nav-links">
+        <button onclick="navigate('home')" id="nav-home" class="active">Home</button>
+        <button onclick="navigate('departments')" id="nav-departments">Departments</button>
+        <button onclick="navigate('login')" id="nav-login">Login</button>
+        <button onclick="navigate('about')" id="nav-about">About</button>
+      </nav>
+      <button class="btn-icon" onclick="toggleTheme()" title="Toggle dark/light mode" aria-label="Toggle theme">
+        <span id="theme-icon">🌙</span>
+      </button>
+      <button class="hamburger btn-icon" onclick="toggleMobileNav()" aria-label="Menu">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobile-nav">
+    <button onclick="navigate('home');toggleMobileNav()">🏠 Home</button>
+    <button onclick="navigate('departments');toggleMobileNav()">🏛️ Departments</button>
+    <button onclick="navigate('login');toggleMobileNav()">🔐 Login</button>
+    <button onclick="navigate('about');toggleMobileNav()">ℹ️ About</button>
+  </nav>
+</header>
+
+<!-- ====================================================
+     PAGE 1: HOME
+==================================================== -->
+<div id="page-home" class="page active">
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="6"/></svg>
+          Official Government Portal
+        </div>
+        <h1>Welcome to the<br/><em>Tamil Nadu</em> AI<br/>Department Portal</h1>
+        <p class="hero-desc">
+          Empowering citizens of Ramanathapuram District with seamless access to government services through digital innovation and AI-driven governance.
+        </p>
+        <div class="hero-stats">
+          <div class="hero-stat"><strong>10+</strong><span>Departments</span></div>
+          <div class="hero-stat"><strong>50K+</strong><span>Citizens Served</span></div>
+          <div class="hero-stat"><strong>24/7</strong><span>Online Services</span></div>
+          <div class="hero-stat"><strong>2026</strong><span>Digital Vision</span></div>
+        </div>
+        <button class="btn-primary" onclick="navigate('departments')">
+          🏛️ Explore Departments
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <div class="hero-visual">
+        <img src="C:/Users/anumu/Documents/Tn_revenue/images/Screenshot 2026-06-04 122942.png" alt="District Information">
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Services -->
+  <section class="home-section">
+    <p class="section-label reveal">Citizen Services</p>
+    <h2 class="section-title reveal">Quick Access Services</h2>
+    <p class="section-desc reveal">Access government services quickly and efficiently. All services are available online 24/7 for citizens of Ramanathapuram District.</p>
+    <div class="quick-grid">
+      <div class="quick-card reveal" onclick="navigate('departments')">
+        <div class="quick-card-icon">📋</div>
+        <h3>Revenue Services</h3>
+        <p>Patta, Chitta, land records and certificates</p>
+      </div>
+      <div class="quick-card reveal" onclick="navigate('departments')">
+        <div class="quick-card-icon">🏥</div>
+        <h3>Health Services</h3>
+        <p>Appointments, health certificates and more</p>
+      </div>
+      <div class="quick-card reveal" onclick="navigate('departments')">
+        <div class="quick-card-icon">🎓</div>
+        <h3>Education</h3>
+        <p>Scholarship applications and school records</p>
+      </div>
+      <div class="quick-card reveal" onclick="navigate('departments')">
+        <div class="quick-card-icon">🚌</div>
+        <h3>Transport</h3>
+        <p>DL renewal, vehicle registration services</p>
+      </div>
+      <div class="quick-card reveal" onclick="navigate('departments')">
+        <div class="quick-card-icon">🌾</div>
+        <h3>Agriculture</h3>
+        <p>Subsidy schemes and crop insurance</p>
+      </div>
+      <div class="quick-card reveal" onclick="navigate('departments')">
+        <div class="quick-card-icon">👩</div>
+        <h3>Women Welfare</h3>
+        <p>Empowerment schemes and assistance</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vision Section -->
+  <section style="background:linear-gradient(135deg,var(--tn-blue-dark),var(--tn-blue));padding:56px 24px;margin-top:0;">
+    <div style="max-width:900px;margin:0 auto;text-align:center;">
+      <p style="color:var(--tn-gold);letter-spacing:2px;font-size:.78rem;text-transform:uppercase;margin-bottom:12px;">Our Vision</p>
+      <h2 style="color:#fff;font-size:clamp(1.4rem,3vw,2rem);margin-bottom:20px;line-height:1.35;">
+        "Digital Empowerment for Every Citizen of Tamil Nadu"
+      </h2>
+      <p style="color:rgba(255,255,255,.75);max-width:620px;margin:0 auto 32px;line-height:1.8;font-size:.95rem;">
+        The Department of Artificial Intelligence, Ramanathapuram aims to harness cutting-edge AI technologies to simplify government service delivery, ensure transparent governance, and create an inclusive digital ecosystem for all residents.
+      </p>
+      <button class="btn-primary" onclick="navigate('departments')">
+        View All Departments
+      </button>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <h3>🏛️ Government of Tamil Nadu</h3>
+        <p>Department of Artificial Intelligence<br/>Ramanathapuram District<br/>Citizen Service Portal — Serving the People with Dignity and Efficiency.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <a href="#">Home</a>
+        <a href="#">Departments</a>
+        <a href="#">Services</a>
+        <a href="#">Contact Us</a>
+        <a href="#">Grievance</a>
+      </div>
+      <div class="footer-col">
+        <h4>Departments</h4>
+        <a href="#">Revenue</a>
+        <a href="#">Health</a>
+        <a href="#">Education</a>
+        <a href="#">Transport</a>
+        <a href="#">Agriculture</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a href="#">📞 1800-425-1234</a>
+        <a href="#">✉️ ai.ramanathapuram@tn.gov.in</a>
+        <a href="#">🌐 www.tnesevai.tn.gov.in</a>
+        <a href="#">Helpdesk: 9 AM – 6 PM</a>
+      </div>
+    </div>
+    <hr class="footer-divider"/>
+    <div class="footer-bottom">
+      <span>© 2026 Government of Tamil Nadu. All Rights Reserved.</span>
+      <div class="footer-badges">
+        <span class="footer-badge">W3C Compliant</span>
+        <span class="footer-badge">ISO 27001</span>
+        <span class="footer-badge">GIGW Certified</span>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ====================================================
+     PAGE 2: DEPARTMENTS
+==================================================== -->
+<div id="page-departments" class="page">
+  <div class="breadcrumb">
+    <span onclick="navigate('home')">Home</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    <span style="color:var(--text-secondary)">Departments</span>
+  </div>
+  <div class="page-hero">
+    <h1>Tamil Nadu Government Departments</h1>
+    <p>Explore major departments delivering essential services to citizens across Tamil Nadu. Click on any department to learn more and access online services.</p>
+    <div class="search-bar-wrap">
+      <input type="text" id="dept-search" placeholder="Search departments..." oninput="searchDepts(this.value)" aria-label="Search departments"/>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#718096" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+  </div>
+
+  <div class="dept-grid-section">
+    <div class="dept-grid" id="dept-grid">
+      <!-- Injected by JS -->
+    </div>
+    <p id="dept-no-results" class="hidden text-center" style="padding:32px;color:var(--text-secondary);">No departments found matching your search.</p>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <h3>🏛️ Government of Tamil Nadu</h3>
+        <p>Department of Artificial Intelligence, Ramanathapuram District</p>
+      </div>
+      <div class="footer-col"><h4>Navigate</h4><a href="#" onclick="navigate('home')">Home</a><a href="#" onclick="navigate('departments')">Departments</a><a href="#" onclick="navigate('login')">Login</a></div>
+      <div class="footer-col"><h4>Help</h4><a href="#">Contact</a><a href="#">FAQ</a><a href="#">Grievance</a></div>
+      <div class="footer-col"><h4>Contact</h4><a href="#">📞 1800-425-1234</a><a href="#">✉️ ai.ramanathapuram@tn.gov.in</a></div>
+    </div>
+    <hr class="footer-divider"/>
+    <div class="footer-bottom">
+      <span>© 2026 Government of Tamil Nadu. All Rights Reserved.</span>
+      <div class="footer-badges"><span class="footer-badge">GIGW Certified</span><span class="footer-badge">ISO 27001</span></div>
+    </div>
+  </footer>
+</div>
+
+<!-- ====================================================
+     PAGE 3: DEPARTMENT DETAIL
+==================================================== -->
+<div id="page-dept-detail" class="page">
+  <div class="breadcrumb">
+    <span onclick="navigate('home')">Home</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    <span onclick="navigate('departments')">Departments</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    <span id="detail-breadcrumb" style="color:var(--text-secondary)">Revenue</span>
+  </div>
+
+  <div class="dept-detail-hero">
+    <div class="dept-detail-hero-inner">
+      <div class="dept-detail-icon-big" id="detail-hero-icon">🏛️</div>
+      <div>
+        <h1 id="detail-hero-title">Revenue and Disaster Management Department</h1>
+        <p id="detail-hero-desc">Ensuring equitable land administration and swift disaster response across Tamil Nadu.</p>
+        <div style="margin-top:14px;">
+          <span class="chip">Government of Tamil Nadu</span>
+          &nbsp;<span class="chip">Ramanathapuram</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dept-detail-body">
+    <button class="back-link" onclick="navigate('departments')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to Departments
+    </button>
+    <div class="detail-grid">
+      <div class="detail-main">
+        <div class="detail-card reveal">
+          <h2>📖 Overview</h2>
+          <p id="detail-overview">The Revenue and Disaster Management Department is one of the most important departments of the Government of Tamil Nadu. It oversees land administration, revenue collection, and disaster management operations across the state.</p>
+        </div>
+        <div class="detail-card reveal">
+          <h2>🎯 Mission</h2>
+          <p id="detail-mission">To provide efficient, transparent, and citizen-centric revenue administration services while ensuring timely disaster preparedness and relief operations for the people of Tamil Nadu.</p>
+        </div>
+        <div class="detail-card reveal">
+          <h2>📌 Key Responsibilities</h2>
+          <ul class="responsibility-list" id="detail-responsibilities">
+            <li><span class="resp-bullet"></span><span>Administration and maintenance of land records (Patta, Chitta, A-Register)</span></li>
+            <li><span class="resp-bullet"></span><span>Collection of land revenue and other government dues</span></li>
+            <li><span class="resp-bullet"></span><span>Disaster relief coordination and fund distribution</span></li>
+            <li><span class="resp-bullet"></span><span>Issuance of community, income, and residence certificates</span></li>
+            <li><span class="resp-bullet"></span><span>Regulation of encroachment on government lands</span></li>
+          </ul>
+        </div>
+        <div class="detail-card reveal">
+          <h2>🤝 Citizen Benefits</h2>
+          <div id="detail-benefits">
+            <span class="benefit-tag">✅ Online Patta Transfer</span>
+            <span class="benefit-tag">✅ Community Certificate</span>
+            <span class="benefit-tag">✅ Income Certificate</span>
+            <span class="benefit-tag">✅ Nativity Certificate</span>
+            <span class="benefit-tag">✅ Disaster Relief Assistance</span>
+            <span class="benefit-tag">✅ Land Survey Records</span>
+            <span class="benefit-tag">✅ FMB Sketch Online</span>
+          </div>
+        </div>
+      </div>
+      <div class="detail-sidebar">
+        <div class="detail-card reveal">
+          <h2>📊 Key Statistics</h2>
+          <div class="stat-grid" id="detail-stats">
+            <div class="stat-box"><strong>2.4M</strong><span>Land Records</span></div>
+            <div class="stat-box"><strong>500+</strong><span>Offices</span></div>
+            <div class="stat-box"><strong>48K</strong><span>Staff</span></div>
+            <div class="stat-box"><strong>99%</strong><span>Uptime</span></div>
+          </div>
+        </div>
+        <div class="detail-card reveal" style="text-align:center;">
+          <h2 style="justify-content:center;">🌐 Access Services</h2>
+          <p style="margin-bottom:20px;font-size:.85rem;color:var(--text-secondary);">Login to access all online services provided by this department through the Tamil Nadu e-Sevai portal.</p>
+          <button class="btn-services" onclick="navigate('login')">
+            🔐 &nbsp;Access Services
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+        <div class="detail-card reveal">
+          <h2>📞 Contact</h2>
+          <p><strong>Helpline:</strong> 1800-425-1234</p>
+          <p><strong>Email:</strong> revenue.tn@tn.gov.in</p>
+          <p><strong>Office:</strong> Secretariat, Chennai – 600 009</p>
+          <p><strong>Hours:</strong> Mon–Fri, 10 AM – 5 PM</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand"><h3>🏛️ Government of Tamil Nadu</h3><p>Department of Artificial Intelligence, Ramanathapuram District</p></div>
+      <div class="footer-col"><h4>Navigate</h4><a href="#" onclick="navigate('home')">Home</a><a href="#" onclick="navigate('departments')">Departments</a></div>
+      <div class="footer-col"><h4>Help</h4><a href="#">Contact</a><a href="#">FAQ</a></div>
+      <div class="footer-col"><h4>Contact</h4><a href="#">📞 1800-425-1234</a></div>
+    </div>
+    <hr class="footer-divider"/>
+    <div class="footer-bottom"><span>© 2026 Government of Tamil Nadu. All Rights Reserved.</span></div>
+  </footer>
+</div>
+
+<!-- ====================================================
+     PAGE 4: LOGIN
+==================================================== -->
+<div id="page-login" class="page">
+  <div class="breadcrumb">
+    <span onclick="navigate('home')">Home</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    <span style="color:var(--text-secondary)">Login Portal</span>
+  </div>
+  <div class="login-page">
+    <div class="login-page-header">
+      <p class="section-label">Secure Access</p>
+      <h1>Citizen Services Authentication Portal</h1>
+      <p>Choose your login type to access Tamil Nadu Government Services</p>
+    </div>
+    <div class="login-panels">
+      <!-- Public Login Panel -->
+      <div class="login-panel">
+        <div class="login-panel-header">
+          <div class="login-panel-icon" style="background:linear-gradient(135deg,#003366,#005588);">
+            <span style="font-size:1.8rem;">👤</span>
+          </div>
+          <h2>Applicant / Public User</h2>
+          <p>For citizens seeking government services</p>
+        </div>
+        <div class="form-group">
+          <label for="pub-user">Username</label>
+          <div class="input-wrap">
+            <input type="text" id="pub-user" placeholder="Enter username" autocomplete="username" aria-label="Username"/>
+          </div>
+          <p class="field-error" id="pub-user-err"></p>
+        </div>
+        <div class="form-group">
+          <label for="pub-pass">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="pub-pass" placeholder="Enter password" autocomplete="current-password" aria-label="Password"/>
+            <button class="toggle-pw" onclick="togglePW('pub-pass',this)" type="button" aria-label="Toggle password visibility">👁️</button>
+          </div>
+          <p class="field-error" id="pub-pass-err"></p>
+        </div>
+        <button class="btn-login" onclick="doLogin('public')">🔐 Login</button>
+        <div class="divider"><span>or</span></div>
+        <button class="btn-register-link" onclick="navigate('register-public')">New User? Register Here</button>
+      </div>
+
+      <!-- Official Login Panel -->
+      <div class="login-panel">
+        <div class="login-panel-header">
+          <div class="login-panel-icon" style="background:linear-gradient(135deg,#C62828,#EF5350);">
+            <span style="font-size:1.8rem;">🏛️</span>
+          </div>
+          <h2>Government Official</h2>
+          <p>For authorised government employees</p>
+        </div>
+        <div class="form-group">
+          <label for="off-user">Official Username</label>
+          <div class="input-wrap">
+            <input type="text" id="off-user" placeholder="Enter official username" autocomplete="username" aria-label="Official username"/>
+          </div>
+          <p class="field-error" id="off-user-err"></p>
+        </div>
+        <div class="form-group">
+          <label for="off-pass">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="off-pass" placeholder="Enter password" autocomplete="current-password" aria-label="Password"/>
+            <button class="toggle-pw" onclick="togglePW('off-pass',this)" type="button" aria-label="Toggle password visibility">👁️</button>
+          </div>
+          <p class="field-error" id="off-pass-err"></p>
+        </div>
+        <button class="btn-login" style="background:var(--tn-red);" onclick="doLogin('official')">🔐 Official Login</button>
+        <div class="divider"><span>or</span></div>
+        <button class="btn-register-link" onclick="navigate('register-official')">New Official? Register Here</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand"><h3>🏛️ Government of Tamil Nadu</h3><p>Department of Artificial Intelligence, Ramanathapuram District</p></div>
+      <div class="footer-col"><h4>Navigate</h4><a href="#" onclick="navigate('home')">Home</a><a href="#" onclick="navigate('departments')">Departments</a></div>
+      <div class="footer-col"><h4>Help</h4><a href="#">Contact</a><a href="#">FAQ</a></div>
+      <div class="footer-col"><h4>Contact</h4><a href="#">📞 1800-425-1234</a></div>
+    </div>
+    <hr class="footer-divider"/>
+    <div class="footer-bottom"><span>© 2026 Government of Tamil Nadu. All Rights Reserved.</span></div>
+  </footer>
+</div>
+
+<!-- ====================================================
+     PAGE 5A: PUBLIC REGISTRATION
+==================================================== -->
+<div id="page-register-public" class="page">
+  <div class="breadcrumb">
+    <span onclick="navigate('home')">Home</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    <span onclick="navigate('login')">Login</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    <span style="color:var(--text-secondary)">Public Registration</span>
+  </div>
+  <div class="register-wrap">
+    <button class="back-link" onclick="navigate('login')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to Login
+    </button>
+    <div class="register-panel">
+      <h2>👤 Public User Registration</h2>
+      <p>Create your citizen account to access Tamil Nadu Government Services</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="reg-name">Full Name *</label>
+          <div class="input-wrap"><input type="text" id="reg-name" placeholder="Your full name"/></div>
+          <p class="field-error" id="reg-name-err"></p>
+        </div>
+        <div class="form-group">
+          <label for="reg-email">Email Address *</label>
+          <div class="input-wrap"><input type="email" id="reg-email" placeholder="email@example.com"/></div>
+          <p class="field-error" id="reg-email-err"></p>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="reg-mobile">Mobile Number *</label>
+        <div class="input-wrap"><input type="tel" id="reg-mobile" placeholder="10-digit mobile number" maxlength="10"/></div>
+        <p class="field-error" id="reg-mobile-err"></p>
+      </div>
+      <div class="form-group">
+        <label for="reg-username">Username *</label>
+        <div class="input-wrap"><input type="text" id="reg-username" placeholder="Choose a username"/></div>
+        <p class="field-error" id="reg-username-err"></p>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="reg-pass">Password *</label>
+          <div class="input-wrap">
+            <input type="password" id="reg-pass" placeholder="Min 8 characters"/>
+            <button class="toggle-pw" onclick="togglePW('reg-pass',this)" type="button">👁️</button>
+          </div>
+          <p class="field-error" id="reg-pass-err"></p>
+        </div>
+        <div class="form-group">
+          <label for="reg-cpass">Confirm Password *</label>
+          <div class="input-wrap">
+            <input type="password" id="reg-cpass" placeholder="Repeat password"/>
+            <button class="toggle-pw" onclick="togglePW('reg-cpass',this)" type="button">👁️</button>
+          </div>
+          <p class="field-error" id="reg-cpass-err"></p>
+        </div>
+      </div>
+      <button class="btn-submit mt-16" onclick="registerPublic()">✅ Create Account</button>
+      <p style="text-align:center;margin-top:14px;font-size:.82rem;color:var(--text-secondary);">
+        Already have an account? <button onclick="navigate('login')" style="background:transparent;color:var(--tn-blue);font-size:.82rem;">Login here</button>
+      </p>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand"><h3>🏛️ Government of Tamil Nadu</h3><p>Department of AI, Ramanathapuram</p></div>
+      <div class="footer-col"><h4>Navigate</h4><a href="#" onclick="navigate('home')">Home</a></div>
+      <div class="footer-col"><h4>Help</h4><a href="#">Contact</a></div>
+      <div class="footer-col"><h4>Contact</h4><a href="#">📞 1800-425-1234</a></div>
+    </div>
+    <hr class="footer-divider"/>
+    <div class="footer-bottom"><span>© 2026 Government of Tamil Nadu. All Rights Reserved.</span></div>
+  </footer>
+</div>
+
+<!-- ====================================================
+     PAGE 5B: OFFICIAL REGISTRATION
+==================================================== -->
+<div id="page-register-official" class="page">
+  <div class="breadcrumb">
+    <span onclick="navigate('home')">Home</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    <span onclick="navigate('login')">Login</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    <span style="color:var(--text-secondary)">Official Registration</span>
+  </div>
+  <div class="register-wrap">
+    <button class="back-link" onclick="navigate('login')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to Login
+    </button>
+    <div class="register-panel">
+      <h2>🏛️ Government Official Registration</h2>
+      <p>Register as a Government Official to access administrative services</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="oreg-name">Official Name *</label>
+          <div class="input-wrap"><input type="text" id="oreg-name" placeholder="Full official name"/></div>
+          <p class="field-error" id="oreg-name-err"></p>
+        </div>
+        <div class="form-group">
+          <label for="oreg-empid">Employee ID *</label>
+          <div class="input-wrap"><input type="text" id="oreg-empid" placeholder="e.g. TN/2024/12345"/></div>
+          <p class="field-error" id="oreg-empid-err"></p>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="oreg-dept">Department *</label>
+        <select class="select-input" id="oreg-dept" aria-label="Department">
+          <option value="">— Select Department —</option>
+          <option>Revenue and Disaster Management</option>
+          <option>Rural Development and Panchayat Raj</option>
+          <option>Health and Family Welfare</option>
+          <option>School Education</option>
+          <option>Higher Education</option>
+          <option>Agriculture and Farmers Welfare</option>
+          <option>Transport</option>
+          <option>Municipal Administration and Water Supply</option>
+          <option>Information Technology</option>
+          <option>Social Welfare and Women Empowerment</option>
+        </select>
+        <p class="field-error" id="oreg-dept-err"></p>
+      </div>
+      <div class="form-group">
+        <label for="oreg-email">Official Email *</label>
+        <div class="input-wrap"><input type="email" id="oreg-email" placeholder="official@tn.gov.in"/></div>
+        <p class="field-error" id="oreg-email-err"></p>
+      </div>
+      <div class="form-group">
+        <label for="oreg-username">Username *</label>
+        <div class="input-wrap"><input type="text" id="oreg-username" placeholder="Choose a username"/></div>
+        <p class="field-error" id="oreg-username-err"></p>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="oreg-pass">Password *</label>
+          <div class="input-wrap">
+            <input type="password" id="oreg-pass" placeholder="Min 8 characters"/>
+            <button class="toggle-pw" onclick="togglePW('oreg-pass',this)" type="button">👁️</button>
+          </div>
+          <p class="field-error" id="oreg-pass-err"></p>
+        </div>
+        <div class="form-group">
+          <label for="oreg-cpass">Confirm Password *</label>
+          <div class="input-wrap">
+            <input type="password" id="oreg-cpass" placeholder="Repeat password"/>
+            <button class="toggle-pw" onclick="togglePW('oreg-cpass',this)" type="button">👁️</button>
+          </div>
+          <p class="field-error" id="oreg-cpass-err"></p>
+        </div>
+      </div>
+      <button class="btn-submit mt-16" style="background:var(--tn-red);" onclick="registerOfficial()">✅ Register as Official</button>
+      <p style="text-align:center;margin-top:14px;font-size:.82rem;color:var(--text-secondary);">
+        Already registered? <button onclick="navigate('login')" style="background:transparent;color:var(--tn-blue);font-size:.82rem;">Login here</button>
+      </p>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand"><h3>🏛️ Government of Tamil Nadu</h3><p>Department of AI, Ramanathapuram</p></div>
+      <div class="footer-col"><h4>Navigate</h4><a href="#" onclick="navigate('home')">Home</a></div>
+      <div class="footer-col"><h4>Help</h4><a href="#">Contact</a></div>
+      <div class="footer-col"><h4>Contact</h4><a href="#">📞 1800-425-1234</a></div>
+    </div>
+    <hr class="footer-divider"/>
+    <div class="footer-bottom"><span>© 2026 Government of Tamil Nadu. All Rights Reserved.</span></div>
+  </footer>
+</div>
+
+<!-- ====================================================
+     PAGE: ABOUT
+==================================================== -->
+<div id="page-about" class="page">
+  <div class="breadcrumb">
+    <span onclick="navigate('home')">Home</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    <span style="color:var(--text-secondary)">About</span>
+  </div>
+  <div style="max-width:900px;margin:0 auto;padding:48px 24px;">
+    <p class="section-label">About Us</p>
+    <h1 class="section-title" style="margin-bottom:20px;">Department of Artificial Intelligence</h1>
+    <div class="detail-card">
+      <h2>🤖 Our Mission</h2>
+      <p>The Department of Artificial Intelligence, Ramanathapuram District, is a pioneering initiative of the Government of Tamil Nadu to integrate AI into public administration. Our mission is to leverage artificial intelligence, machine learning, and data science to improve governance, streamline citizen services, and promote transparent, accountable public administration.</p>
+    </div>
+    <div class="detail-card">
+      <h2>🌐 Digital Tamil Nadu Vision</h2>
+      <p>Aligned with the Tamil Nadu Digital Transformation Policy 2025, we are committed to creating a digitally empowered citizenry. From AI-powered chatbots for grievance redressal to predictive analytics for disaster management, our department leads the charge in public sector innovation.</p>
+    </div>
+    <div class="detail-card">
+      <h2>📍 About Ramanathapuram</h2>
+      <p>Ramanathapuram, popularly known as Ramnad, is a historic coastal district in Tamil Nadu. It is known for the Ramanathaswamy Temple at Rameswaram — one of the 12 Jyotirlinga temples — and is an important cultural and economic centre of southeastern Tamil Nadu. The district is home to approximately 13.5 lakh people spread across 8 taluks.</p>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand"><h3>🏛️ Government of Tamil Nadu</h3><p>Department of AI, Ramanathapuram</p></div>
+      <div class="footer-col"><h4>Navigate</h4><a href="#" onclick="navigate('home')">Home</a><a href="#" onclick="navigate('departments')">Departments</a></div>
+      <div class="footer-col"><h4>Help</h4><a href="#">Contact</a></div>
+      <div class="footer-col"><h4>Contact</h4><a href="#">📞 1800-425-1234</a></div>
+    </div>
+    <hr class="footer-divider"/>
+    <div class="footer-bottom"><span>© 2026 Government of Tamil Nadu. All Rights Reserved.</span></div>
+  </footer>
+</div>
+
+<!-- ====================================================
+     JAVASCRIPT
+==================================================== -->
+<script>
+/* ============================================================
+   DATA – DEPARTMENTS
+============================================================ */
+const DEPARTMENTS = [
+  {
+    id: 'revenue',
+    icon: '🏛️',
+    color: '#003366',
+    name: 'Revenue and Disaster Management Department',
+    short: 'Land records, Patta/Chitta, community certificates, income certificates, and disaster relief.',
+    overview: 'The Revenue and Disaster Management Department is one of the most important departments of the Government of Tamil Nadu. It oversees land administration, revenue collection, and disaster management operations across the state.',
+    mission: 'To provide efficient, transparent, and citizen-centric revenue administration while ensuring timely disaster preparedness, response, and relief operations for all citizens of Tamil Nadu.',
+    responsibilities: [
+      'Administration and maintenance of land records (Patta, Chitta, A-Register)',
+      'Collection of land revenue and other government dues',
+      'Disaster relief coordination and fund distribution',
+      'Issuance of community, income, and residence certificates',
+      'Regulation of encroachment on government lands',
+      'Conducting revenue courts and settlement operations'
+    ],
+    stats: [
+      { val: '2.4M', label: 'Land Records' },
+      { val: '500+', label: 'Offices' },
+      { val: '48K', label: 'Staff' },
+      { val: '99%', label: 'Uptime' }
+    ],
+    benefits: ['Online Patta Transfer', 'Community Certificate', 'Income Certificate', 'Nativity Certificate', 'Disaster Relief', 'FMB Sketch Online']
+  },
+  {
+    id: 'rural',
+    icon: '🏡',
+    color: '#2E7D32',
+    name: 'Rural Development and Panchayat Raj Department',
+    short: 'Rural infrastructure, Panchayat governance, MGNREGS, drinking water and sanitation.',
+    overview: 'This department is responsible for the administration and development of rural areas through local self-governance, infrastructure development, and welfare schemes for rural communities.',
+    mission: 'To achieve sustainable rural development through effective Panchayati Raj institutions, empowering local communities and improving the quality of rural life.',
+    responsibilities: [
+      'Implementation of MGNREGS scheme',
+      'Panchayat election supervision',
+      'Rural road and infrastructure development',
+      'Solid waste management in rural areas',
+      'Implementation of rural housing schemes',
+      'Monitoring of rural welfare programmes'
+    ],
+    stats: [
+      { val: '12,618', label: 'Panchayats' },
+      { val: '32K', label: 'Staff' },
+      { val: '₹8,200Cr', label: 'Budget' },
+      { val: '6M', label: 'Beneficiaries' }
+    ],
+    benefits: ['MGNREGS Job Card', 'Rural Housing Scheme', 'Village Road Development', 'Sanitation Services', 'Water Supply', 'Anganwadi Support']
+  },
+  {
+    id: 'health',
+    icon: '🏥',
+    color: '#C62828',
+    name: 'Health and Family Welfare Department',
+    short: 'Public hospitals, primary healthcare, immunisation, family welfare and disease control.',
+    overview: 'The Health and Family Welfare Department is tasked with ensuring accessible, affordable, and quality healthcare to all citizens of Tamil Nadu through a robust public health infrastructure.',
+    mission: 'To ensure universal health coverage for all citizens of Tamil Nadu, achieving optimal health outcomes through an efficient public health system and proactive disease prevention.',
+    responsibilities: [
+      'Management of government hospitals and PHCs',
+      'National immunisation programme implementation',
+      'Maternal and child health services',
+      'Communicable and non-communicable disease control',
+      'Medical education and training',
+      'Health insurance scheme administration (Chief Minister\'s Health Insurance)'
+    ],
+    stats: [
+      { val: '2,000+', label: 'Hospitals' },
+      { val: '8,700+', label: 'PHCs' },
+      { val: '1.2Lakh', label: 'Staff' },
+      { val: '₹22K Cr', label: 'Budget' }
+    ],
+    benefits: ['Free Dialysis', 'Chief Minister\'s Insurance', 'Free Medicine Scheme', 'Free Eye Check-up', 'Mental Health Support', 'Ambulance Services (108)']
+  },
+  {
+    id: 'school-edu',
+    icon: '🏫',
+    color: '#1565C0',
+    name: 'School Education Department',
+    short: 'Government schools, mid-day meals, free textbooks, scholarships and quality education.',
+    overview: 'The School Education Department oversees government schools across Tamil Nadu, striving to provide quality, inclusive, and equitable education to children from all economic backgrounds.',
+    mission: 'To ensure every child in Tamil Nadu receives quality education from Kindergarten to Class 12, with a focus on universal enrolment, zero dropout, and holistic development.',
+    responsibilities: [
+      'Management of 37,000+ government schools',
+      'Implementation of mid-day meal scheme',
+      'Free textbook, uniform, and footwear distribution',
+      'Teacher recruitment and training',
+      'Scholarship schemes for deserving students',
+      'Implementation of RTE Act provisions'
+    ],
+    stats: [
+      { val: '37K+', label: 'Schools' },
+      { val: '5.2M', label: 'Students' },
+      { val: '2.2Lakh', label: 'Teachers' },
+      { val: '98%', label: 'Enrolment' }
+    ],
+    benefits: ['Free Textbooks', 'Free Uniforms', 'Mid-Day Meal', 'Merit Scholarship', 'Free Bus Pass', 'Computer Education']
+  },
+  {
+    id: 'higher-edu',
+    icon: '🎓',
+    color: '#4A148C',
+    name: 'Higher Education Department',
+    short: 'Universities, colleges, technical education, arts and science institutions across Tamil Nadu.',
+    overview: 'The Higher Education Department oversees universities, affiliated colleges, polytechnics, and other higher educational institutions to maintain academic standards and promote research.',
+    mission: 'To foster excellence in higher education by developing world-class educational institutions, promoting research, and ensuring equitable access to quality tertiary education.',
+    responsibilities: [
+      'Regulation and governance of universities',
+      'Affiliation of Arts and Science colleges',
+      'Scholarship disbursement for college students',
+      'Curriculum development and quality assurance',
+      'Support for research and innovation',
+      'International academic collaborations'
+    ],
+    stats: [
+      { val: '62', label: 'Universities' },
+      { val: '1,500+', label: 'Colleges' },
+      { val: '2.1M', label: 'Students' },
+      { val: '₹9K Cr', label: 'Budget' }
+    ],
+    benefits: ['Free Higher Education (SC/ST)', 'Merit Scholarship', 'Research Fellowship', 'Fee Concession', 'Career Guidance', 'Skill Development']
+  },
+  {
+    id: 'agri',
+    icon: '🌾',
+    color: '#558B2F',
+    name: 'Agriculture and Farmers Welfare Department',
+    short: 'Crop insurance, farm subsidies, PM-KISAN, soil health cards and agri extension.',
+    overview: 'The Agriculture and Farmers Welfare Department works towards the prosperity of the farming community by implementing welfare schemes, providing extension services, and promoting sustainable farming practices.',
+    mission: 'To enhance agricultural productivity and ensure the economic security of farmers in Tamil Nadu through welfare schemes, modern technology adoption, and sustainable farming practices.',
+    responsibilities: [
+      'Implementation of PM-KISAN and state subsidy schemes',
+      'Soil testing and soil health card distribution',
+      'Crop insurance programme management',
+      'Agricultural extension and advisory services',
+      'Promotion of organic farming',
+      'Farmers\' training and capacity building'
+    ],
+    stats: [
+      { val: '8.2M', label: 'Farmers' },
+      { val: '14,000+', label: 'Villages' },
+      { val: '₹5,800Cr', label: 'Subsidies' },
+      { val: '3.4M', label: 'Hectares' }
+    ],
+    benefits: ['PM-KISAN Benefit', 'Crop Insurance', 'Free Seeds', 'Subsidy on Equipment', 'Soil Health Card', 'Kisan Credit Card']
+  },
+  {
+    id: 'transport',
+    icon: '🚌',
+    color: '#E65100',
+    name: 'Transport Department',
+    short: 'Driving licences, vehicle registration, road safety, fitness certificates and MV Act enforcement.',
+    overview: 'The Transport Department of Tamil Nadu manages vehicle registration, driving licences, road safety enforcement, and public transportation regulation across the state.',
+    mission: 'To ensure safe, efficient, and sustainable transportation for all citizens of Tamil Nadu by modernising transport services and enforcing road safety laws.',
+    responsibilities: [
+      'Driving licence issuance and renewal',
+      'Vehicle registration and fitness certification',
+      'Road transport permit issuance',
+      'Road safety enforcement and awareness',
+      'Regulation of contract carriage and stage carriage',
+      'Implementation of Motor Vehicles Act'
+    ],
+    stats: [
+      { val: '22M+', label: 'Vehicles' },
+      { val: '145', label: 'RTO Offices' },
+      { val: '18M+', label: 'Licences' },
+      { val: '2,500', label: 'Staff' }
+    ],
+    benefits: ['Online DL Renewal', 'RC Book Online', 'E-Challan View', 'NOC for Vehicle', 'Tax Payment Online', 'Permit Application']
+  },
+  {
+    id: 'maws',
+    icon: '🏙️',
+    color: '#00695C',
+    name: 'Municipal Administration and Water Supply Department',
+    short: 'Urban local bodies, drinking water, sewerage, street lights and solid waste management.',
+    overview: 'The Municipal Administration and Water Supply Department oversees urban local bodies and ensures the provision of basic civic amenities including drinking water, sewerage, waste management, and urban infrastructure.',
+    mission: 'To provide world-class urban civic services to all residents, ensuring clean water, proper sanitation, and well-maintained urban infrastructure for a high quality of life.',
+    responsibilities: [
+      'Supervision of municipal corporations and town panchayats',
+      'Drinking water supply and maintenance',
+      'Underground drainage system management',
+      'Solid waste management in urban areas',
+      'Birth and death certificate registration',
+      'Urban road and streetlight maintenance'
+    ],
+    stats: [
+      { val: '15', label: 'Corporations' },
+      { val: '121', label: 'Municipalities' },
+      { val: '528', label: 'Town Panchayats' },
+      { val: '8.5M', label: 'Households' }
+    ],
+    benefits: ['Birth Certificate', 'Death Certificate', 'Property Tax Online', 'Water Bill Online', 'Trade Licence', 'Building Approval']
+  },
+  {
+    id: 'it',
+    icon: '💻',
+    color: '#0277BD',
+    name: 'Information Technology Department',
+    short: 'e-Governance, digital infrastructure, data centres, IT policy and startup ecosystem support.',
+    overview: 'The Information Technology Department drives the digital transformation of Tamil Nadu, fostering a robust IT ecosystem while delivering e-governance services to citizens and businesses.',
+    mission: 'To position Tamil Nadu as a leading technology hub by developing world-class digital infrastructure, promoting the IT industry, and delivering seamless e-governance services.',
+    responsibilities: [
+      'Management of state data centres',
+      'E-governance application development',
+      'IT policy formulation and implementation',
+      'Promotion of IT investments and exports',
+      'Cybersecurity policy and governance',
+      'Support for startups and innovation hubs'
+    ],
+    stats: [
+      { val: '₹3.2Lakh Cr', label: 'IT Exports' },
+      { val: '5,000+', label: 'IT Companies' },
+      { val: '700+', label: 'e-Services' },
+      { val: '1,000+', label: 'Startups' }
+    ],
+    benefits: ['e-Sevai Online', 'DigiLocker Integration', 'Online NOC', 'Digital Signature', 'IT Job Portal', 'Startup Support']
+  },
+  {
+    id: 'welfare',
+    icon: '👩',
+    color: '#880E4F',
+    name: 'Social Welfare and Women Empowerment Department',
+    short: 'Women welfare, child care, Anganwadi, SHG support and social security pensions.',
+    overview: 'The Social Welfare and Women Empowerment Department implements welfare schemes for women, children, and vulnerable groups to promote social equity and economic empowerment.',
+    mission: 'To create an inclusive and equitable society by empowering women, protecting children, and providing social security to vulnerable sections of the community.',
+    responsibilities: [
+      'Administration of Integrated Child Development Services (ICDS)',
+      'Women empowerment and SHG promotion',
+      'Child labour prevention and rehabilitation',
+      'Social security pension disbursement',
+      'Welfare of transgender persons',
+      'Prevention of domestic violence and support to victims'
+    ],
+    stats: [
+      { val: '54,000+', label: 'Anganwadis' },
+      { val: '4.8M', label: 'SHG Members' },
+      { val: '3.2M', label: 'Pension Beneficiaries' },
+      { val: '₹7,200Cr', label: 'Scheme Outlay' }
+    ],
+    benefits: ['Cradle Baby Scheme', 'Magalir Urimai Thogai', 'Pension Scheme', 'SHG Loans', 'Free Sewing Machine', 'Child Care Services']
+  }
+];
+
+/* ============================================================
+   PAGE NAVIGATION
+============================================================ */
+const ALL_PAGES = ['home','departments','dept-detail','login','register-public','register-official','about'];
+const NAV_BTNS  = { home: 'nav-home', departments: 'nav-departments', login: 'nav-login', about: 'nav-about' };
+
+function navigate(pageId) {
+  // Hide all pages
+  ALL_PAGES.forEach(p => {
+    const el = document.getElementById('page-' + p);
+    if (el) { el.classList.remove('active'); }
+  });
+  // Show target
+  const target = document.getElementById('page-' + pageId);
+  if (target) { target.classList.add('active'); }
+  // Update nav active state
+  Object.keys(NAV_BTNS).forEach(k => {
+    const btn = document.getElementById(NAV_BTNS[k]);
+    if (btn) btn.classList.toggle('active', k === pageId);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Lazy render dept grid
+  if (pageId === 'departments') renderDepts(DEPARTMENTS);
+  // Trigger scroll animations
+  setTimeout(initReveal, 100);
+}
+
+/* ============================================================
+   DEPARTMENT GRID RENDERING
+============================================================ */
+function renderDepts(list) {
+  const grid = document.getElementById('dept-grid');
+  const none = document.getElementById('dept-no-results');
+  if (!grid) return;
+  if (!list.length) {
+    grid.innerHTML = '';
+    none.classList.remove('hidden');
+    return;
+  }
+  none.classList.add('hidden');
+  grid.innerHTML = list.map(d => `
+    <div class="dept-card reveal" onclick="openDeptDetail('${d.id}')">
+      <div class="dept-card-header">
+        <div class="dept-icon-wrap" style="background:${d.color}22;">
+          <span style="font-size:1.5rem;">${d.icon}</span>
+        </div>
+        <div>
+          <h3>${d.name}</h3>
+        </div>
+      </div>
+      <p>${d.short}</p>
+      <button class="btn-outline" onclick="event.stopPropagation();openDeptDetail('${d.id}')">
+        View Details
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  `).join('');
+  setTimeout(initReveal, 120);
+}
+
+function searchDepts(q) {
+  const filt = DEPARTMENTS.filter(d =>
+    d.name.toLowerCase().includes(q.toLowerCase()) ||
+    d.short.toLowerCase().includes(q.toLowerCase())
+  );
+  renderDepts(filt);
+}
+
+/* ============================================================
+   DEPARTMENT DETAIL PAGE
+============================================================ */
+function openDeptDetail(id) {
+  const d = DEPARTMENTS.find(x => x.id === id);
+  if (!d) return;
+  // Update detail page content
+  document.getElementById('detail-breadcrumb').textContent = d.name;
+  document.getElementById('detail-hero-icon').textContent  = d.icon;
+  document.getElementById('detail-hero-title').textContent = d.name;
+  document.getElementById('detail-hero-desc').textContent  = d.short;
+  document.getElementById('detail-overview').textContent   = d.overview;
+  document.getElementById('detail-mission').textContent    = d.mission;
+  // Responsibilities
+  document.getElementById('detail-responsibilities').innerHTML =
+    d.responsibilities.map(r => `<li><span class="resp-bullet"></span><span>${r}</span></li>`).join('');
+  // Benefits
+  document.getElementById('detail-benefits').innerHTML =
+    d.benefits.map(b => `<span class="benefit-tag">✅ ${b}</span>`).join('');
+  // Stats
+  document.getElementById('detail-stats').innerHTML =
+    d.stats.map(s => `<div class="stat-box"><strong>${s.val}</strong><span>${s.label}</span></div>`).join('');
+  navigate('dept-detail');
+}
+
+/* ============================================================
+   THEME TOGGLE
+============================================================ */
+function toggleTheme() {
+  const body = document.body;
+  const isDark = body.getAttribute('data-theme') === 'dark';
+  body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('theme-icon').textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('tn-theme', isDark ? 'light' : 'dark');
+}
+
+function loadTheme() {
+  const saved = localStorage.getItem('tn-theme') || 'light';
+  document.body.setAttribute('data-theme', saved);
+  document.getElementById('theme-icon').textContent = saved === 'dark' ? '☀️' : '🌙';
+}
+
+/* ============================================================
+   MOBILE NAV TOGGLE
+============================================================ */
+function toggleMobileNav() {
+  document.getElementById('mobile-nav').classList.toggle('open');
+}
+
+/* ============================================================
+   PASSWORD VISIBILITY TOGGLE
+============================================================ */
+function togglePW(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  if (!inp) return;
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁️'; }
+}
+
+/* ============================================================
+   TOAST NOTIFICATION
+============================================================ */
+function showToast(msg, type = 'success') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type === 'error' ? 'error' : type === 'warn' ? 'warn' : '');
+  const icons = { success: '✅', error: '❌', warn: '⚠️' };
+  t.innerHTML = `<span style="font-size:1.1rem;">${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 4500);
+}
+
+/* ============================================================
+   FORM VALIDATION HELPERS
+============================================================ */
+function setErr(id, msg) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = msg;
+}
+function clearErr(id) { setErr(id, ''); }
+function highlightField(id, hasErr) {
+  const inp = document.getElementById(id);
+  if (inp) inp.classList.toggle('error-field', hasErr);
+}
+
+/* ============================================================
+   PUBLIC USER REGISTRATION
+============================================================ */
+function registerPublic() {
+  let valid = true;
+  const fields = ['reg-name','reg-email','reg-mobile','reg-username','reg-pass','reg-cpass'];
+  fields.forEach(f => { clearErr(f + '-err'); highlightField(f, false); });
+
+  const name     = document.getElementById('reg-name').value.trim();
+  const email    = document.getElementById('reg-email').value.trim();
+  const mobile   = document.getElementById('reg-mobile').value.trim();
+  const username = document.getElementById('reg-username').value.trim();
+  const pass     = document.getElementById('reg-pass').value;
+  const cpass    = document.getElementById('reg-cpass').value;
+
+  if (!name) { setErr('reg-name-err','Full name is required.'); highlightField('reg-name', true); valid = false; }
+  if (!email || !/^\S+@\S+\.\S+$/.test(email)) { setErr('reg-email-err','Enter a valid email.'); highlightField('reg-email', true); valid = false; }
+  if (!mobile || !/^\d{10}$/.test(mobile)) { setErr('reg-mobile-err','Enter a valid 10-digit number.'); highlightField('reg-mobile', true); valid = false; }
+  if (!username || username.length < 4) { setErr('reg-username-err','Username must be at least 4 characters.'); highlightField('reg-username', true); valid = false; }
+  if (!pass || pass.length < 8) { setErr('reg-pass-err','Password must be at least 8 characters.'); highlightField('reg-pass', true); valid = false; }
+  if (pass !== cpass) { setErr('reg-cpass-err','Passwords do not match.'); highlightField('reg-cpass', true); valid = false; }
+  if (!valid) return;
+
+  // Check username uniqueness
+  const users = JSON.parse(localStorage.getItem('tn-public-users') || '[]');
+  if (users.find(u => u.username === username)) {
+    setErr('reg-username-err','Username already taken. Choose another.');
+    highlightField('reg-username', true);
+    return;
+  }
+  users.push({ name, email, mobile, username, password: pass });
+  localStorage.setItem('tn-public-users', JSON.stringify(users));
+  showToast('Account created successfully! You can now login.', 'success');
+  // Clear form
+  ['reg-name','reg-email','reg-mobile','reg-username','reg-pass','reg-cpass'].forEach(id => {
+    const inp = document.getElementById(id);
+    if (inp) inp.value = '';
+  });
+  setTimeout(() => navigate('login'), 1200);
+}
+
+/* ============================================================
+   OFFICIAL REGISTRATION
+============================================================ */
+function registerOfficial() {
+  let valid = true;
+  const fields = ['oreg-name','oreg-empid','oreg-dept','oreg-email','oreg-username','oreg-pass','oreg-cpass'];
+  fields.forEach(f => { clearErr(f + '-err'); highlightField(f, false); });
+
+  const name     = document.getElementById('oreg-name').value.trim();
+  const empid    = document.getElementById('oreg-empid').value.trim();
+  const dept     = document.getElementById('oreg-dept').value;
+  const email    = document.getElementById('oreg-email').value.trim();
+  const username = document.getElementById('oreg-username').value.trim();
+  const pass     = document.getElementById('oreg-pass').value;
+  const cpass    = document.getElementById('oreg-cpass').value;
+
+  if (!name) { setErr('oreg-name-err','Official name is required.'); highlightField('oreg-name', true); valid = false; }
+  if (!empid) { setErr('oreg-empid-err','Employee ID is required.'); highlightField('oreg-empid', true); valid = false; }
+  if (!dept) { setErr('oreg-dept-err','Please select a department.'); valid = false; }
+  if (!email || !/^\S+@\S+\.\S+$/.test(email)) { setErr('oreg-email-err','Enter a valid email.'); highlightField('oreg-email', true); valid = false; }
+  if (!username || username.length < 4) { setErr('oreg-username-err','Username must be at least 4 characters.'); highlightField('oreg-username', true); valid = false; }
+  if (!pass || pass.length < 8) { setErr('oreg-pass-err','Password must be at least 8 characters.'); highlightField('oreg-pass', true); valid = false; }
+  if (pass !== cpass) { setErr('oreg-cpass-err','Passwords do not match.'); highlightField('oreg-cpass', true); valid = false; }
+  if (!valid) return;
+
+  const officials = JSON.parse(localStorage.getItem('tn-officials') || '[]');
+  if (officials.find(o => o.username === username)) {
+    setErr('oreg-username-err','Username already taken. Choose another.');
+    highlightField('oreg-username', true);
+    return;
+  }
+  officials.push({ name, empid, dept, email, username, password: pass });
+  localStorage.setItem('tn-officials', JSON.stringify(officials));
+  showToast('Official account registered! You can now login.', 'success');
+  ['oreg-name','oreg-empid','oreg-email','oreg-username','oreg-pass','oreg-cpass'].forEach(id => {
+    const inp = document.getElementById(id);
+    if (inp) inp.value = '';
+  });
+  document.getElementById('oreg-dept').value = '';
+  setTimeout(() => navigate('login'), 1200);
+}
+
+/* ============================================================
+   LOGIN
+============================================================ */
+function doLogin(type) {
+  if (type === 'public') {
+    const username = document.getElementById('pub-user').value.trim();
+    const password = document.getElementById('pub-pass').value;
+    clearErr('pub-user-err'); clearErr('pub-pass-err');
+    highlightField('pub-user', false); highlightField('pub-pass', false);
+
+    if (!username) { setErr('pub-user-err','Username is required.'); highlightField('pub-user', true); return; }
+    if (!password) { setErr('pub-pass-err','Password is required.'); highlightField('pub-pass', true); return; }
+
+    const users = JSON.parse(localStorage.getItem('tn-public-users') || '[]');
+    const user  = users.find(u => u.username === username && u.password === password);
+    if (!user) {
+      setErr('pub-pass-err','Invalid username or password.');
+      highlightField('pub-user', true); highlightField('pub-pass', true);
+      showToast('Login failed. Please check your credentials.', 'error');
+      return;
+    }
+    loginSuccess(user.name);
+  } else {
+    const username = document.getElementById('off-user').value.trim();
+    const password = document.getElementById('off-pass').value;
+    clearErr('off-user-err'); clearErr('off-pass-err');
+    highlightField('off-user', false); highlightField('off-pass', false);
+
+    if (!username) { setErr('off-user-err','Username is required.'); highlightField('off-user', true); return; }
+    if (!password) { setErr('off-pass-err','Password is required.'); highlightField('off-pass', true); return; }
+
+    const officials = JSON.parse(localStorage.getItem('tn-officials') || '[]');
+    const official  = officials.find(o => o.username === username && o.password === password);
+    if (!official) {
+      setErr('off-pass-err','Invalid username or password.');
+      highlightField('off-user', true); highlightField('off-pass', true);
+      showToast('Login failed. Please check your credentials.', 'error');
+      return;
+    }
+    loginSuccess(official.name);
+  }
+}
+
+function loginSuccess(name) {
+  showToast(`Welcome, ${name}! Redirecting to TN e-Sevai...`, 'success');
+  const rp = document.getElementById('redirect-page');
+  rp.classList.add('show');
+  setTimeout(() => {
+    window.location.href = 'https://www.tnesevai.tn.gov.in/';
+  }, 1000);
+}
+
+/* ============================================================
+   SCROLL REVEAL ANIMATION
+============================================================ */
+function initReveal() {
+  const els = document.querySelectorAll('.page.active .reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  els.forEach(el => observer.observe(el));
+}
+
+/* ============================================================
+   INITIALISE
+============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  loadTheme();
+  
+  const overlay = document.getElementById('loading-overlay');
+  if (overlay) {
+    overlay.classList.add('hide');
+    // Fallback if transitionend doesn't fire
+    setTimeout(() => { if(overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 600);
+  }
+  
+  initReveal();
+});
+</script>
+</body>
+</html>
